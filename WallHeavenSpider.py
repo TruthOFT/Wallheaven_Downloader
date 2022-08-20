@@ -88,6 +88,8 @@ class WallHeavenSpider:
         cls.__start(_urls, **kwargs)
         if "classify" in kwargs:
             pass
+        else:
+            pass
 
 
 search_key = input("请输入您想下载的图片英文名字:")
