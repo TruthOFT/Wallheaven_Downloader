@@ -86,6 +86,8 @@ class WallHeavenSpider:
         else:
             kwargs["output_dir"] = kwargs["output_dir"]
         cls.__start(_urls, **kwargs)
+        if "classify" in kwargs:
+            pass
 
 
 search_key = input("请输入您想下载的图片英文名字:")
