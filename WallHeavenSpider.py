@@ -1,11 +1,13 @@
 import os
 import re
+import shutil
 import threading
 from queue import Queue
 
 import requests
 from fake_useragent import UserAgent
 from lxml import etree
+from PIL import Image
 
 
 class WallHeavenSpider:
@@ -71,6 +73,28 @@ class WallHeavenSpider:
             t.join()
 
     @classmethod
+    def __classify(cls, output_dir: str):
+        for images in os.listdir(output_dir):
+            image_path = os.path.join(output_dir, images).replace("\\", "/")
+            img = Image.open(image_path)
+            width = img.width
+            if 1920 <= width < 2560:
+                width_dir = "1080"
+            elif 2560 <= width < 3200:
+                width_dir = "2K"
+            elif 3200 <= width < 4096:
+                width_dir = "3K"
+            elif 4096 <= width < 5120:
+                width_dir = "4K"
+            else:
+                width_dir = "other"
+
+            img.close()
+            if not os.path.exists(f"./{output_dir}/{width_dir}"):
+                os.mkdir(f"./{output_dir}/{width_dir}")
+            shutil.move(f"{image_path}", f"{output_dir}/{width_dir}/{images}")
+
+    @classmethod
     def get_pic(cls, key: str, **kwargs):
         _url = f"https://wallhaven.cc/search?q={key}"
         _page_count = cls.__get_pages(_url)
@@ -83,14 +107,12 @@ class WallHeavenSpider:
             _urls = [f"https://wallhaven.cc/search?q={key}&page={i}" for i in range(1, int(_want_download) + 1)]
         if "output_dir" not in kwargs:
             kwargs["output_dir"] = "./wallheaven_wallpaper"
-        else:
-            kwargs["output_dir"] = kwargs["output_dir"]
         cls.__start(_urls, **kwargs)
+        # 分类, 待完善
         if "classify" in kwargs:
-            pass
-        else:
-            pass
+            if kwargs["classify"]:
+                cls.__classify(kwargs["output_dir"])
 
 
 search_key = input("请输入您想下载的图片英文名字:")
-WallHeavenSpider.get_pic(search_key, output_dir="./aaa")
+WallHeavenSpider.get_pic(search_key, classify=True)
